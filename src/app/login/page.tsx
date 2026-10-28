@@ -1,5 +1,6 @@
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,19 @@ async function login(formData: FormData) {
   }
 }
 
-export default async function LoginPage({
+// searchParams sind Request-Daten: mit Cache Components müssen sie in <Suspense> gelesen werden,
+// damit der Rest der Seite trotzdem vorab gerendert werden kann.
+async function LoginError({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
+  if (!error) return null;
+  return <p className="text-sm text-destructive">E-Mail oder Passwort stimmt nicht.</p>;
+}
+
+export default function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { error } = await searchParams;
   return (
     <div className="flex min-h-screen items-center justify-center bg-pastel-pink/40 p-4">
       <Card className="w-full max-w-sm">
@@ -40,7 +48,9 @@ export default async function LoginPage({
             autoComplete="current-password"
             required
           />
-          {error && <p className="text-sm text-destructive">E-Mail oder Passwort stimmt nicht.</p>}
+          <Suspense>
+            <LoginError searchParams={searchParams} />
+          </Suspense>
           <Button type="submit" className="w-full">
             Anmelden
           </Button>
