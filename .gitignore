@@ -45,3 +45,8 @@ next-env.d.ts
 /src/generated
 
 # lokale Env-Dateien
+.env.local
+
+# IDE-Files
+.idea
+.idea/*
